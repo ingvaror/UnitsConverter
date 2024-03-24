@@ -7,7 +7,14 @@ using namespace Units;
 
 std::shared_ptr<UnitsConverter> UnitsConverter::GetInstance()
 {
-    return std::make_shared<UnitsConverter>();
+    auto instance = std::make_shared<UnitsConverter>();
+    instance->AddUnitsDescription(Units::M, {1, L"m"});
+    instance->AddUnitsDescription(Units::MM, {1e-3, L"mm"});
+    instance->AddUnitsDescription(Units::MICRON, {1e-6, L"μm"});    
+    instance->AddUnitsDescription(Units::NM, {1e-9, L"nm"});
+    
+    instance->AddUnitsQuantity(Units::Length, { Units::M, Units::MM, Units::MICRON, Units::NM });
+    return instance;
 }
 
 void UnitsConverter::AddUnitsQuantity(UnitsQuantity unitsQuantity, const std::vector<UnitsType>& units)

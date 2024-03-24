@@ -33,8 +33,6 @@ find_package(Qt6 COMPONENTS Widgets Gui REQUIRED)
 add_executable(UnitsConverter
 	UnitsConverter.cpp 
 	UnitsConverter.h
-	UnitsConverterInitializer.cpp
-	UnitsType.h    
 	main.cpp
 )
 target_link_libraries(UnitsConverter ${Boost_LIBRARIES})
