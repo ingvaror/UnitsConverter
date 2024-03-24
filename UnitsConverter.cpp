@@ -9,11 +9,12 @@ std::shared_ptr<UnitsConverter> UnitsConverter::GetInstance()
 {
     auto instance = std::make_shared<UnitsConverter>();
     instance->AddUnitsDescription(Units::M, {1, L"m"});
+    instance->AddUnitsDescription(Units::CM, {1, L"cm"});    
     instance->AddUnitsDescription(Units::MM, {1e-3, L"mm"});
     instance->AddUnitsDescription(Units::MICRON, {1e-6, L"μm"});    
     instance->AddUnitsDescription(Units::NM, {1e-9, L"nm"});
     
-    instance->AddUnitsQuantity(Units::Length, { Units::M, Units::MM, Units::MICRON, Units::NM });
+    instance->AddUnitsQuantity(Units::Length, { Units::M, Units::CM, Units::MM, Units::MICRON, Units::NM });
     return instance;
 }
 
@@ -29,6 +30,7 @@ void UnitsConverter::AddUnitsDescription(UnitsType unitsType, const UnitsDescrip
 
 std::optional<double> UnitsConverter::GetDoubleFromString(const std::wstring& input, UnitsQuantity quantity, std::optional<UnitsType> inputType)
 {
+    assert(quantity != Dimensionless || !inputType.has_value());
     std::optional<double> value;
     std::optional<UnitsDescription> unitsDescription;
     // Parse string 
@@ -47,11 +49,15 @@ std::optional<double> UnitsConverter::GetDoubleFromString(const std::wstring& in
         }
         catch(...)
         {
-            assert(m_quantityData.count(quantity));
+            if (quantity == Dimensionless)
+                return std::nullopt;
+            if(!m_quantityData.count(quantity))
+                return std::nullopt; 
             const auto& quantitySet = m_quantityData.at(quantity);
             for (const UnitsType unitType : quantitySet)
             {
-                assert(m_desciptionData.count(unitType));
+                if(!m_desciptionData.count(unitType))
+                    return std::nullopt; 
                 const auto description = m_desciptionData.at(unitType);
                 if(boost::iequals(description.m_name, token))
                 {
@@ -59,6 +65,8 @@ std::optional<double> UnitsConverter::GetDoubleFromString(const std::wstring& in
                     break;
                 }
             }
+            if (!unitsDescription.has_value())
+                return std::nullopt;
         }
     }
     if (value.has_value())
@@ -70,7 +78,8 @@ std::optional<double> UnitsConverter::GetDoubleFromString(const std::wstring& in
         }
         else if (inputType.has_value())
         {
-            assert(m_desciptionData.count(*inputType));
+            if(!m_desciptionData.count(*inputType))
+                return std::nullopt;
             const auto& defaultDescription = m_desciptionData.at(*inputType);
             return (*value) * defaultDescription.m_coeff;
         }

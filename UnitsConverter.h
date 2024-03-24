@@ -11,12 +11,14 @@ namespace Units
 {
     enum UnitsQuantity
     {
+        Dimensionless,
         Length
     };
 
     enum UnitsType
     {
         M = 0,
+        CM,
         MM,
         MICRON,
         NM
